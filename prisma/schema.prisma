@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Profile {
+  id         Int       @id @default(autoincrement())
+  name       String
+  bio        String?
+  avatarUrl  String?
+  githubUrl  String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  
+  projects   Project[]
+  
+  @@map("profiles")
+}
+
+model Project {
+  id             Int          @id @default(autoincrement())
+  title          String
+  description    String?
+  repositoryUrl  String?
+  liveUrl        String?
+  likes          Int          @default(0)
+  averageRating  Float?       @default(0.0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  
+  profileId      Int
+  profile        Profile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  technologies   Technology[]
+  feedbacks      Feedback[]
+  
+  @@map("projects")
+}
+
+model Technology {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  
+  projects  Project[]
+  
+  @@map("technologies")
+}
+
+model Feedback {
+  id          Int       @id @default(autoincrement())
+  rating      Int
+  comment     String?
+  authorName  String
+  createdAt   DateTime  @default(now())
+  
+  projectId   Int
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@map("feedbacks")
+}
