@@ -36,5 +36,6 @@ build/
 coverage/
 
 # Test
+test-*.js
 *.test.js
 *.spec.js
