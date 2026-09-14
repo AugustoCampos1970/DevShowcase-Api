@@ -1,3 +1,5 @@
+const AppError = require('../errors/AppError');
+
 // Profile Service
 class ProfileService {
   constructor(profileRepository) {
@@ -12,7 +14,7 @@ class ProfileService {
     const profile = await this.profileRepository.findById(id);
     
     if (!profile) {
-      throw new Error('Profile not found');
+      throw new AppError('Profile not found', 404);
     }
     
     return profile;
@@ -26,7 +28,7 @@ class ProfileService {
     const exists = await this.profileRepository.exists(id);
     
     if (!exists) {
-      throw new Error('Profile not found');
+      throw new AppError('Profile not found', 404);
     }
     
     return await this.profileRepository.update(id, profileData);
@@ -36,7 +38,7 @@ class ProfileService {
     const exists = await this.profileRepository.exists(id);
     
     if (!exists) {
-      throw new Error('Profile not found');
+      throw new AppError('Profile not found', 404);
     }
     
     return await this.profileRepository.delete(id);

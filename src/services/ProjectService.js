@@ -1,3 +1,5 @@
+const AppError = require('../errors/AppError');
+
 // Project Service
 class ProjectService {
   constructor(projectRepository, profileService, technologyService, feedbackRepository) {
@@ -13,13 +15,13 @@ class ProjectService {
     // Check if profile exists
     const profileExists = await this.profileService.profileExists(profileId);
     if (!profileExists) {
-      throw new Error('Profile not found');
+      throw new AppError('Profile not found', 404);
     }
     
     // Check if all technologies exist
     const technologies = await this.technologyService.getTechnologiesByIds(technologyIds);
     if (technologies.length !== technologyIds.length) {
-      throw new Error('One or more technologies not found');
+      throw new AppError('One or more technologies not found', 400);
     }
     
     return await this.projectRepository.create(projectData);
@@ -29,7 +31,7 @@ class ProjectService {
     const project = await this.projectRepository.findById(id);
     
     if (!project) {
-      throw new Error('Project not found');
+      throw new AppError('Project not found', 404);
     }
     
     return project;
@@ -39,7 +41,7 @@ class ProjectService {
     const { technology, page = 1, limit = 10 } = filters;
     
     if (page < 1 || limit < 1) {
-      throw new Error('Page and limit must be positive numbers');
+      throw new AppError('Page and limit must be positive numbers', 400);
     }
     
     const projects = await this.projectRepository.findAll({ technology, page, limit });
@@ -62,7 +64,7 @@ class ProjectService {
     const exists = await this.projectRepository.exists(id);
     
     if (!exists) {
-      throw new Error('Project not found');
+      throw new AppError('Project not found', 404);
     }
     
     const { profileId, technologyIds } = projectData;
@@ -71,7 +73,7 @@ class ProjectService {
     if (profileId) {
       const profileExists = await this.profileService.profileExists(profileId);
       if (!profileExists) {
-        throw new Error('Profile not found');
+        throw new AppError('Profile not found', 404);
       }
     }
     
@@ -79,7 +81,7 @@ class ProjectService {
     if (technologyIds && technologyIds.length > 0) {
       const technologies = await this.technologyService.getTechnologiesByIds(technologyIds);
       if (technologies.length !== technologyIds.length) {
-        throw new Error('One or more technologies not found');
+        throw new AppError('One or more technologies not found', 400);
       }
     }
     
@@ -90,7 +92,7 @@ class ProjectService {
     const exists = await this.projectRepository.exists(id);
     
     if (!exists) {
-      throw new Error('Project not found');
+      throw new AppError('Project not found', 404);
     }
     
     return await this.projectRepository.delete(id);
@@ -100,7 +102,7 @@ class ProjectService {
     const exists = await this.projectRepository.exists(id);
     
     if (!exists) {
-      throw new Error('Project not found');
+      throw new AppError('Project not found', 404);
     }
     
     return await this.projectRepository.incrementLikes(id);
@@ -110,7 +112,7 @@ class ProjectService {
     const projectExists = await this.projectRepository.exists(projectId);
     
     if (!projectExists) {
-      throw new Error('Project not found');
+      throw new AppError('Project not found', 404);
     }
     
     const feedback = await this.feedbackRepository.create({

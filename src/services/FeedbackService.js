@@ -1,3 +1,5 @@
+const AppError = require('../errors/AppError');
+
 // Feedback Service
 class FeedbackService {
   constructor(feedbackRepository, projectService) {
@@ -9,7 +11,7 @@ class FeedbackService {
     const projectExists = await this.projectService.projectExists(projectId);
     
     if (!projectExists) {
-      throw new Error('Project not found');
+      throw new AppError('Project not found', 404);
     }
     
     const feedback = await this.feedbackRepository.create({
@@ -24,7 +26,7 @@ class FeedbackService {
     const feedback = await this.feedbackRepository.findById(id);
     
     if (!feedback) {
-      throw new Error('Feedback not found');
+      throw new AppError('Feedback not found', 404);
     }
     
     return feedback;
@@ -34,7 +36,7 @@ class FeedbackService {
     const projectExists = await this.projectService.projectExists(projectId);
     
     if (!projectExists) {
-      throw new Error('Project not found');
+      throw new AppError('Project not found', 404);
     }
     
     return await this.feedbackRepository.findAllByProject(projectId);
@@ -44,7 +46,7 @@ class FeedbackService {
     const exists = await this.feedbackRepository.exists(id);
     
     if (!exists) {
-      throw new Error('Feedback not found');
+      throw new AppError('Feedback not found', 404);
     }
     
     return await this.feedbackRepository.update(id, feedbackData);
@@ -54,7 +56,7 @@ class FeedbackService {
     const exists = await this.feedbackRepository.exists(id);
     
     if (!exists) {
-      throw new Error('Feedback not found');
+      throw new AppError('Feedback not found', 404);
     }
     
     const feedback = await this.feedbackRepository.findById(id);
@@ -69,7 +71,7 @@ class FeedbackService {
     const projectExists = await this.projectService.projectExists(projectId);
     
     if (!projectExists) {
-      throw new Error('Project not found');
+      throw new AppError('Project not found', 404);
     }
     
     return await this.feedbackRepository.getAverageRating(projectId);

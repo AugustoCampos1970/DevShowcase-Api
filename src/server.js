@@ -4,6 +4,7 @@ const helmet = require('helmet');
 require('dotenv').config();
 
 const { PrismaClient } = require('@prisma/client');
+const AppError = require('./errors/AppError');
 const prisma = new PrismaClient();
 
 // Import Swagger documentation
@@ -92,13 +93,30 @@ swaggerDocs(app, PORT);
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err.message);
-  console.error(err.stack);
+
+  // Custom AppError
+  if (err instanceof AppError) {
+    return res.status(err.statusCode).json({
+      success: false,
+      error: err.name,
+      message: err.message
+    });
+  }
+
+  // Malformed JSON
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({
+      success: false,
+      error: 'Bad Request',
+      message: 'Invalid JSON in request body'
+    });
+  }
 
   // Prisma errors
   if (err.code === 'P2002') {
     return res.status(409).json({
       success: false,
-      error: 'Conflict Error',
+      error: 'Conflict',
       message: 'A record with this value already exists'
     });
   }
@@ -108,31 +126,6 @@ app.use((err, req, res, next) => {
       success: false,
       error: 'Not Found',
       message: 'Record not found'
-    });
-  }
-
-  // Custom error messages
-  if (err.message.includes('not found')) {
-    return res.status(404).json({
-      success: false,
-      error: 'Not Found',
-      message: err.message
-    });
-  }
-
-  if (err.message.includes('already exists')) {
-    return res.status(409).json({
-      success: false,
-      error: 'Conflict',
-      message: err.message
-    });
-  }
-
-  if (err.message.includes('Validation')) {
-    return res.status(400).json({
-      success: false,
-      error: 'Validation Error',
-      message: err.message
     });
   }
 

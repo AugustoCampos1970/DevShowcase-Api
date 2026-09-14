@@ -82,6 +82,7 @@ const validate = (schema) => (req, res, next) => {
     }));
     
     res.status(400).json({
+      success: false,
       error: 'Validation Error',
       message: 'Invalid request data',
       details: validationErrors
@@ -112,6 +113,7 @@ module.exports = {
     const id = parseInt(req.params.id);
     if (isNaN(id) || id <= 0) {
       return res.status(400).json({
+        success: false,
         error: 'Validation Error',
         message: 'Invalid ID format',
         details: [{ field: 'id', message: 'ID must be a positive integer' }]
