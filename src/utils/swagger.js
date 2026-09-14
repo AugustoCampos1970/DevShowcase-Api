@@ -18,16 +18,7 @@ const options = {
         url: 'https://opensource.org/licenses/MIT'
       }
     },
-    servers: [
-      {
-        url: 'http://localhost:3000',
-        description: 'Development server'
-      },
-      {
-        url: 'https://devshowcase-api.onrender.com',
-        description: 'Production server'
-      }
-    ],
+    servers: [],
     tags: [
       {
         name: 'Profiles',
@@ -291,6 +282,105 @@ const options = {
               example: false
             }
           }
+        },
+        CreateProfileInput: {
+          type: 'object',
+          required: ['name'],
+          properties: {
+            name: {
+              type: 'string',
+              description: 'Nome do desenvolvedor',
+              example: 'João Silva'
+            },
+            bio: {
+              type: 'string',
+              description: 'Biografia do desenvolvedor',
+              example: 'Desenvolvedor Full Stack com 5 anos de experiência'
+            },
+            avatarUrl: {
+              type: 'string',
+              description: 'URL do avatar do desenvolvedor',
+              example: 'https://github.com/joaosilva.png'
+            },
+            githubUrl: {
+              type: 'string',
+              description: 'URL do perfil GitHub',
+              example: 'https://github.com/joaosilva'
+            }
+          }
+        },
+        CreateTechnologyInput: {
+          type: 'object',
+          required: ['name'],
+          properties: {
+            name: {
+              type: 'string',
+              description: 'Nome da tecnologia',
+              example: 'Node.js'
+            }
+          }
+        },
+        CreateProjectInput: {
+          type: 'object',
+          required: ['title', 'profileId', 'technologyIds'],
+          properties: {
+            title: {
+              type: 'string',
+              description: 'Título do projeto',
+              example: 'DevShowcase API'
+            },
+            description: {
+              type: 'string',
+              description: 'Descrição detalhada do projeto',
+              example: 'API REST completa para portfólio de desenvolvedores'
+            },
+            repositoryUrl: {
+              type: 'string',
+              description: 'URL do repositório do projeto',
+              example: 'https://github.com/joaosilva/devshowcase-api'
+            },
+            liveUrl: {
+              type: 'string',
+              description: 'URL de deploy do projeto',
+              example: 'https://devshowcase-api.herokuapp.com'
+            },
+            profileId: {
+              type: 'integer',
+              description: 'ID do perfil do desenvolvedor proprietário',
+              example: 1
+            },
+            technologyIds: {
+              type: 'array',
+              items: {
+                type: 'integer'
+              },
+              description: 'Lista de IDs das tecnologias associadas',
+              example: [1, 2]
+            }
+          }
+        },
+        CreateFeedbackInput: {
+          type: 'object',
+          required: ['rating', 'authorName'],
+          properties: {
+            rating: {
+              type: 'integer',
+              minimum: 1,
+              maximum: 5,
+              description: 'Avaliação de 1 a 5 estrelas',
+              example: 5
+            },
+            comment: {
+              type: 'string',
+              description: 'Comentário sobre o projeto',
+              example: 'Excelente projeto! Muito bem documentado.'
+            },
+            authorName: {
+              type: 'string',
+              description: 'Nome do autor do feedback',
+              example: 'Ana Costa'
+            }
+          }
         }
       }
     },
@@ -324,7 +414,15 @@ const options = {
             }
           },
           responses: {
-            201: { description: 'Perfil criado com sucesso' }
+            201: { description: 'Perfil criado com sucesso' },
+            400: {
+              description: 'Erro de validação nos dados enviados',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ValidationError' }
+                }
+              }
+            }
           }
         }
       },
@@ -337,7 +435,22 @@ const options = {
           ],
           responses: {
             200: { description: 'Perfil encontrado' },
-            404: { description: 'Perfil não encontrado' }
+            400: {
+              description: 'Formato de ID inválido',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ValidationError' }
+                }
+              }
+            },
+            404: {
+              description: 'Perfil não encontrado',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/Error' }
+                }
+              }
+            }
           }
         }
       },
@@ -366,7 +479,15 @@ const options = {
             }
           },
           responses: {
-            201: { description: 'Projeto criado com sucesso' }
+            201: { description: 'Projeto criado com sucesso' },
+            400: {
+              description: 'Erro de validação nos dados enviados',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ValidationError' }
+                }
+              }
+            }
           }
         }
       },
@@ -379,7 +500,22 @@ const options = {
           ],
           responses: {
             200: { description: 'Projeto encontrado' },
-            404: { description: 'Projeto não encontrado' }
+            400: {
+              description: 'Formato de ID inválido',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ValidationError' }
+                }
+              }
+            },
+            404: {
+              description: 'Projeto não encontrado',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/Error' }
+                }
+              }
+            }
           }
         }
       },
@@ -391,7 +527,23 @@ const options = {
             { name: 'id', in: 'path', required: true, schema: { type: 'integer' } }
           ],
           responses: {
-            200: { description: 'Upvote registrado com sucesso' }
+            200: { description: 'Upvote registrado com sucesso' },
+            400: {
+              description: 'Formato de ID inválido',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ValidationError' }
+                }
+              }
+            },
+            404: {
+              description: 'Projeto não encontrado',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/Error' }
+                }
+              }
+            }
           }
         }
       },
@@ -415,7 +567,15 @@ const options = {
             }
           },
           responses: {
-            201: { description: 'Tecnologia criada com sucesso' }
+            201: { description: 'Tecnologia criada com sucesso' },
+            400: {
+              description: 'Erro de validação nos dados enviados',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ValidationError' }
+                }
+              }
+            }
           }
         }
       },
@@ -428,7 +588,22 @@ const options = {
           ],
           responses: {
             200: { description: 'Tecnologia encontrada' },
-            404: { description: 'Tecnologia não encontrada' }
+            400: {
+              description: 'Formato de ID inválido',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ValidationError' }
+                }
+              }
+            },
+            404: {
+              description: 'Tecnologia não encontrada',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/Error' }
+                }
+              }
+            }
           }
         }
       },
@@ -448,7 +623,23 @@ const options = {
             }
           },
           responses: {
-            201: { description: 'Feedback adicionado com sucesso' }
+            201: { description: 'Feedback adicionado com sucesso' },
+            400: {
+              description: 'Erro de validação nos dados enviados',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ValidationError' }
+                }
+              }
+            },
+            404: {
+              description: 'Projeto não encontrado',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/Error' }
+                }
+              }
+            }
           }
         }
       },
@@ -460,7 +651,15 @@ const options = {
             { name: 'projectId', in: 'path', required: true, schema: { type: 'integer' } }
           ],
           responses: {
-            200: { description: 'Lista de feedbacks' }
+            200: { description: 'Lista de feedbacks' },
+            400: {
+              description: 'Formato de ID inválido',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ValidationError' }
+                }
+              }
+            }
           }
         }
       },
@@ -472,7 +671,15 @@ const options = {
             { name: 'projectId', in: 'path', required: true, schema: { type: 'integer' } }
           ],
           responses: {
-            200: { description: 'Média de avaliação retornada com sucesso' }
+            200: { description: 'Média de avaliação retornada com sucesso' },
+            400: {
+              description: 'Formato de ID inválido',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ValidationError' }
+                }
+              }
+            }
           }
         }
       },
@@ -485,7 +692,22 @@ const options = {
           ],
           responses: {
             200: { description: 'Feedback encontrado' },
-            404: { description: 'Feedback não encontrado' }
+            400: {
+              description: 'Formato de ID inválido',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ValidationError' }
+                }
+              }
+            },
+            404: {
+              description: 'Feedback não encontrado',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/Error' }
+                }
+              }
+            }
           }
         }
       }
@@ -497,10 +719,14 @@ const options = {
 const swaggerSpec = swaggerJsdoc(options);
 
 const swaggerDocs = (app, port) => {
-  // Swagger page
+  const baseUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${port}`;
+  swaggerSpec.servers = [
+    { url: '/', description: 'Servidor relativo (automático)' },
+    { url: baseUrl, description: 'Servidor configurado' }
+  ];
+
   app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-  // Docs in JSON format
   app.get('/docs.json', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.send(swaggerSpec);
@@ -509,4 +735,4 @@ const swaggerDocs = (app, port) => {
   console.log(`📚 Swagger docs available at http://localhost:${port}/docs`);
 };
 
-module.exports = swaggerDocs;
+module.exports = swaggerDocs;     
